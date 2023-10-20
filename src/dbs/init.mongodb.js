@@ -2,7 +2,7 @@
 
 const mongoose = require('mongoose');
 
-const connectString = `mongodb://localhost:27017/ecommerce-db`
+const connectString = `mongodb://127.0.0.1:27017/ecommerce-db`
 const { countConnect } = require('../helpers/check.connect')
 
 class Database {
