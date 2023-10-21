@@ -1,4 +1,4 @@
-const { createUser, createAccessToken } = require("../services/auth.service");
+const { createUser, createAccessToken, signInService } = require("../services/auth.service");
 
 const signUp = async (req, res, next) => {
     try {
@@ -35,7 +35,27 @@ const refreshToken = async (req, res, next) => {
     }
 }
 
+const signIn = async (req, res, next) => {
+    try {
+        email = req.body.email
+        password = req.body.password
+        const data = await signInService(email, password)
+        return res.status(200).json({
+            status: 200,
+            message: 'Sign in success',
+            data: data
+        })
+
+    } catch (error) {
+        return res.status(400).json({
+            status: 400,
+            message: error.message
+        })
+    }
+}
+
 module.exports = {
     signUp,
     refreshToken,
+    signIn,
 }

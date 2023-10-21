@@ -4,6 +4,7 @@ require('dotenv').config();
 
 const User = require("../models/user.model")
 const KeyToken = require("../models/keytoken.model");
+const { pickProperties } = require("../utils");
 
 const secretKey = process.env.DEV_APP_SECRET_KEY;
 const secretKeyRefreshToken = process.env.DEV_APP_SECRET_KEY_REFRESH_TOKEN
@@ -103,7 +104,25 @@ const createAccessToken = async (userId, refreshToken) => {
     })
 }
 
+const signInService = async (email, password) => {
+    const user = await User.findOne({ email })
+
+    if (!user) { throw new Error("Email is incorrect") }
+
+    const isMatchPassword = await comparePassword(password, user.password)
+
+    if (!isMatchPassword) { throw new Error("Password is incorrect") }
+
+    const accessToken = generateAccessToken(pickProperties(user, ['username', 'email']))
+
+    return {
+        user: pickProperties(user, ['username', 'email']),
+        accessToken
+    }
+}
+
 module.exports = {
     createUser,
-    createAccessToken
+    createAccessToken,
+    signInService
 }
