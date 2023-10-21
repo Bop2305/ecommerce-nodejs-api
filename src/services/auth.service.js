@@ -1,10 +1,14 @@
 const jwt = require("jsonwebtoken")
 const bcrypt = require("bcrypt")
+require('dotenv').config();
 
 const User = require("../models/user.model")
-const KeyToken = require("../models/keytoken.model")
+const KeyToken = require("../models/keytoken.model");
 
-// var secretKey = process.env.DEV_APP_SECRET_KEY
+const secretKey = process.env.DEV_APP_SECRET_KEY;
+const secretKeyRefreshToken = process.env.DEV_APP_SECRET_KEY_REFRESH_TOKEN
+const expiredAccessToken = process.env.DEV_EXPIRED_ACCESS_TOKEN
+const expiredRefreshToken = process.env.DEV_EXPIRED_REFRESH_TOKEN
 
 // Hash password
 const encodePassword = async (password) => {
@@ -19,7 +23,7 @@ const encodePassword = async (password) => {
     }
 }
 
-// Validate password
+// Compare password
 const comparePassword = async (password, hashPassword) => {
     try {
         const isMatch = await bcrypt.compare(password, hashPassword);
@@ -29,11 +33,28 @@ const comparePassword = async (password, hashPassword) => {
     }
 }
 
+// Generate a access token
+const generateAccessToken = (user) => {
+    const accessToken = jwt.sign({ username: user.username, email: user.email }, secretKey, {
+        expiresIn: expiredAccessToken,
+    })
+
+    return accessToken
+}
+
+// Generate a refresh token
+const generateRefreshToken = (user) => {
+    const refreshToken = jwt.sign({ username: user.username, email: user.email }, secretKeyRefreshToken, {
+        expiresIn: expiredRefreshToken,
+    })
+
+    return refreshToken
+}
+
 const createUser = async (user) => {
-    const secretKey = process.env.DEV_APP_SECRET_KEY
     const hashedPassword = await encodePassword(user.password)
 
-    // Register user
+    // Create a new user
     const newUser = new User({
         username: user.username,
         email: user.email,
@@ -42,18 +63,12 @@ const createUser = async (user) => {
 
     await newUser.save()
 
-    // Generate a access token
-    const accessToken = jwt.sign({ username: user.username, email: user.email }, secretKey, {
-        expiresIn: '1h',
-    })
+    const accessToken = generateAccessToken(user)
 
-    // Generate a secret token
-    const refreshToken = jwt.sign({ username: user.username, email: user.email }, secretKey, {
-        expiresIn: '3d',
-    })
+    const refreshToken = generateRefreshToken(user)
 
-    // Save secret token into database
-    const findedUser = User.findOne({ email: user.email })
+    // Save the refresh token into the database
+    const findedUser = await User.findOne({ email: user.email })
 
     const newRefreshToken = new KeyToken({
         refresh_token: refreshToken,
@@ -63,12 +78,32 @@ const createUser = async (user) => {
     await newRefreshToken.save()
 
     return {
+        user: findedUser,
         accessToken,
         refreshToken
     }
 
 }
 
+const createAccessToken = async (userId, refreshToken) => {
+    const keyToken = await KeyToken.findOne({ user: userId, refresh_token: refreshToken }).sort({ create_at: -1 })
+
+    if (!keyToken) {
+        throw new Error('Jwt token not found')
+    }
+
+    return jwt.verify(keyToken.refresh_token, secretKeyRefreshToken, (err, decode) => {
+        if (err) {
+            throw err
+        } else {
+            const accessToken = generateAccessToken(decode)
+
+            return accessToken
+        }
+    })
+}
+
 module.exports = {
-    createUser
+    createUser,
+    createAccessToken
 }
