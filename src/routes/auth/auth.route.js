@@ -1,15 +1,16 @@
 const express = require('express')
-const { signUp, refreshToken, signIn } = require('../../controllers/auth.controller')
-const { verifyToken } = require('../../middlewares/auth.middleware')
+const { signUp, refreshJwt, signIn } = require('../../controllers/auth.controller')
+const { verifyToken, isAdmin, checkRole, checkPermission } = require('../../middlewares/auth.middleware')
+const { checkDuplicateUsernameOrEmail } = require('../../middlewares/verify.middleware')
 const routes = express.Router()
 
-routes.post('/sign-up', signUp)
+routes.post('/sign-up', checkDuplicateUsernameOrEmail, signUp)
 
 routes.post('/sign-in', signIn)
 
-routes.post('/refresh-token', refreshToken)
+routes.post('/refresh-token', refreshJwt)
 
-routes.get('', verifyToken, (req, res) => {
+routes.get('', [verifyToken, checkRole('User'), checkPermission('Update')], (req, res) => {
     return res.status(200).json({
         status: 200,
         message: 'OK'

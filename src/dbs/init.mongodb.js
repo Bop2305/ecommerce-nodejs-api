@@ -1,8 +1,13 @@
 'use strict'
 
+require('dotenv').config();
 const mongoose = require('mongoose');
 
-const connectString = `mongodb://127.0.0.1:27017/ecommerce-db`
+const host = process.env.DEV_DB_HOST
+const port = process.env.DEV_DB_PORT
+const name = process.env.DEV_DB_NAME
+
+const connectString = `mongodb://${host}:${port}/${name}`
 const { countConnect } = require('../helpers/check.connect')
 
 class Database {
