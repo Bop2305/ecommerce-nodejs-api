@@ -26,4 +26,21 @@ checkOverload()
 // init router
 app.use(routes)
 
+// Handle error
+app.use((req, res, next) => {
+    return res.status(404).json({
+        status: 400,
+        message: "Not Found"
+    })
+})
+
+app.use((error, req, res, next) => {
+    const status = error.status || 500
+    const message = error.message || "Internal Server Error"
+    return res.status(status).json({
+        status: status,
+        message: message
+    })
+})
+
 module.exports = app

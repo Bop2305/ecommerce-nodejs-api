@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
 const Role = require("../models/role.model");
 const Permission = require("../models/permission.model");
+const { BadRequestErrorResponse, ForbiddenErrorResponse, AuthorizationErrorResponse } = require("../core/error.response");
 require('dotenv').config();
 
 const secretKey = process.env.DEV_APP_SECRET_KEY;
@@ -9,22 +10,12 @@ const secretKey = process.env.DEV_APP_SECRET_KEY;
 const verifyToken = async (req, res, next) => {
     const bearerToken = req.headers['authorization'];
 
-    if (!bearerToken) {
-        return res.status(400).json({
-            status: 403,
-            message: "No token provided!"
-        })
-    }
+    if (!bearerToken) throw new AuthorizationErrorResponse()
 
     const accessToken = bearerToken.substring(7)
 
     jwt.verify(accessToken, secretKey, (err, decoded) => {
-        if (err) {
-            return res.status(401).json({
-                status: 401,
-                message: "Authorization "
-            })
-        }
+        if (err) throw new AuthorizationErrorResponse()
 
         req.userId = decoded.id;
 
@@ -36,41 +27,19 @@ const checkRole = (roleName) => {
     return async (req, res, next) => {
         const userId = req.userId
 
-        try {
-            const user = await User.findById(userId)
+        const user = await User.findById(userId)
 
-            if (!user) {
-                return res.status(404).json({
-                    status: 404,
-                    message: "User not found"
-                })
-            }
+        if (!user) throw new BadRequestErrorResponse("User not found")
 
-            const role = await Role.findById(user.role)
+        const role = await Role.findById(user.role)
 
-            if (!role) {
-                return res.status(404).json({
-                    status: 404,
-                    message: "Role not found"
-                })
-            }
+        if (!role)  throw new ForbiddenErrorResponse("Role not found",) 
 
-            if (role.name != roleName) {
-                return res.status(403).json({
-                    status: 403,
-                    message: "Forbidden"
-                })
-            }
+        if(role.name != roleName) throw new ForbiddenErrorResponse()
 
-            req.permissions = role.permission
+        req.permissions = role.permission
 
-            return next()
-        } catch (error) {
-            return res.status(400).json({
-                status: 400,
-                message: error.message
-            })
-        }
+        return next()
     }
 }
 
@@ -78,38 +47,21 @@ const checkPermission = (permissionName) => {
     return async (req, res, next) => {
         const permissionIds = req.permissions
 
-        try {
-            const allPermission = await Permission.findOne({ name: "All" })
+        const allPermission = await Permission.findOne({ name: "All" })
 
-            if (allPermission && permissionIds.includes(allPermission.id)) {
-                return next()
-            }
-
-            const permission = await Permission.findOne({ name: permissionName })
-
-            if (!permission) {
-                return res.status(403).json({
-                    status: 403,
-                    message: "Forbidden"
-                })
-            }
-
-            const hasPermission = permissionIds.includes(permission.id)
-
-            if (!hasPermission) {
-                return res.status(403).json({
-                    status: 403,
-                    message: "Forbidden"
-                })
-            }
-
+        if (allPermission && permissionIds.includes(allPermission.id)) {
             return next()
-        } catch (error) {
-            return res.status(400).json({
-                status: 400,
-                message: error.message
-            })
         }
+
+        const permission = await Permission.findOne({ name: permissionName })
+
+        if (!permission) throw new ForbiddenErrorResponse()
+
+        const hasPermission = permissionIds.includes(permission.id)
+
+        if (!hasPermission) throw new ForbiddenErrorResponse()
+
+        return next()
     }
 }
 
