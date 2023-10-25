@@ -1,7 +1,6 @@
 'use strict'
 
 const HttpStatusCode = {
-    OK: 200,
     BAD_REQUEST: 400,
     AUTHORIZATION: 401,
     FORBIDDEN: 403,
@@ -10,7 +9,6 @@ const HttpStatusCode = {
 }
 
 const HttpMessage = {
-    OK: "OK",
     BAD_REQUEST: "Bad Request",
     AUTHORIZATION: "Authorization",
     FORBIDDEN: "Forbidden",
