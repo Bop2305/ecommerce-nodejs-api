@@ -29,7 +29,7 @@ app.use(routes)
 // Handle error
 app.use((req, res, next) => {
     return res.status(404).json({
-        status: 400,
+        status: 404,
         message: "Not Found"
     })
 })

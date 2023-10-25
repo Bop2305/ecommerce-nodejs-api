@@ -3,6 +3,7 @@ const User = require("../models/user.model");
 const Role = require("../models/role.model");
 const Permission = require("../models/permission.model");
 const { BadRequestErrorResponse, ForbiddenErrorResponse, AuthorizationErrorResponse } = require("../core/error.response");
+const { getBlackListByUserId } = require("../services/blackList.service");
 require('dotenv').config();
 
 const secretKey = process.env.DEV_APP_SECRET_KEY;
@@ -14,13 +15,26 @@ const verifyToken = async (req, res, next) => {
 
     const accessToken = bearerToken.substring(7)
 
-    jwt.verify(accessToken, secretKey, (err, decoded) => {
+    const jwtDecoded = jwt.verify(accessToken, secretKey, (err, decoded) => {
         if (err) throw new AuthorizationErrorResponse()
 
-        req.userId = decoded.id;
-
-        return next()
+        return decoded
     })
+
+    const userId = jwtDecoded.id
+
+    req.userId = jwtDecoded.id;
+    req.accessToken = accessToken
+
+    const foundBlackList = await getBlackListByUserId(userId)
+
+    if(!foundBlackList) return next()
+
+    const isBlackList = foundBlackList.tokens.includes(accessToken)
+
+    if(isBlackList) throw new ForbiddenErrorResponse("Please log in again")
+
+    next()
 }
 
 const checkRole = (roleName) => {
