@@ -7,7 +7,7 @@ const host = process.env.DEV_DB_HOST
 const port = process.env.DEV_DB_PORT
 const name = process.env.DEV_DB_NAME
 
-const connectString = `mongodb://${host}:${port}/${name}`
+const connectString = `mongodb://db:${port}/${name}`
 const { countConnect } = require('../helpers/check.connect')
 
 class Database {
