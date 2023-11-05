@@ -14,18 +14,26 @@ services:
       - 3000:3000
     depends_on:
       - db
+    networks:
+      - app-network
 
   db:
     image: mongo:latest
     volumes:
       - ./mongo_data:/data/db
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: root
+      # MONGO_INITDB_ROOT_USERNAME: root
+      # MONGO_INITDB_ROOT_PASSWORD: root
       MONGO_INITDB_DATABASE: ecommerce-db
     ports:
       - 27017:27017
+    networks:
+      - app-network
 
 volumes:
   mongo_data:
+
+networks:
+  app-network:
+    driver: bridge
 

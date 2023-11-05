@@ -14,7 +14,7 @@ routes.post('/refresh-token', asyncHandle(refreshJwt))
 
 routes.get('/logout', asyncHandle(verifyToken), asyncHandle(logout))
 
-routes.get('', [asyncHandle(verifyToken), asyncHandle(checkRole('User')), asyncHandle(checkPermission('Read'))], (req, res) => {
+routes.get('', [asyncHandle(verifyToken), asyncHandle(checkRole(['User'])), asyncHandle(checkPermission('Read'))], (req, res) => {
     return res.status(200).json({
         status: 200,
         message: 'OK'

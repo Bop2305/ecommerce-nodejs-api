@@ -31,7 +31,7 @@ const signUp = async (req, res) => {
         accessToken,
     }
 
-    new CreatedSuccessResponse({ message: "User registration successful", data })
+    new CreatedSuccessResponse({ message: "User registration successful", data }).send(res)
 }
 
 const refreshJwt = async (req, res) => {    

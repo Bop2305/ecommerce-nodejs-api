@@ -37,7 +37,7 @@ const verifyToken = async (req, res, next) => {
     next()
 }
 
-const checkRole = (roleName) => {
+const checkRole = (roleNames) => {
     return async (req, res, next) => {
         const userId = req.userId
 
@@ -49,7 +49,7 @@ const checkRole = (roleName) => {
 
         if (!role)  throw new ForbiddenErrorResponse("Role not found",) 
 
-        if(role.name != roleName) throw new ForbiddenErrorResponse()
+        if(!roleNames.includes(role.name)) throw new ForbiddenErrorResponse()
 
         req.permissions = role.permission
 
