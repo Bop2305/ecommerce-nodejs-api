@@ -1,5 +1,3 @@
-'use strict'
-
 const { default: mongoose } = require("mongoose");
 
 const discountSchema = new mongoose.Schema({
