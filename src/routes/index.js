@@ -7,4 +7,6 @@ routes.use('/product', require('./product.route'))
 
 routes.use('/discount', require('./discount.route'))
 
+routes.use('/cart', require('./cart.route'))
+
 module.exports = routes

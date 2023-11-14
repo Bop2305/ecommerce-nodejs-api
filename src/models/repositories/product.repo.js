@@ -37,7 +37,7 @@ const getAllProduct = async ({ limit, page, sort, filter, select }) => {
     return products
 }
 
-const getProductById = async ({ productId, unselect }) => {
+const getProductById = async ({ productId, unselect = ['__v'] }) => {
     const product = await Product.findById(productId).select(unselectPropertiesData(unselect))
 
     return product
