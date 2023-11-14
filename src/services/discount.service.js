@@ -207,7 +207,7 @@ class DiscountService {
 
         if (!foundDiscount) throw new BadRequestErrorResponse('Discount code not found')
 
-        const updatedDiscount = await Discount.updateOne({
+        const updatedDiscount = await Discount.findOneAndUpdate({
             _id: discountId
         }, {
             $pull: { discount_users_used: userId },
