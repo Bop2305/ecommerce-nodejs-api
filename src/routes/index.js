@@ -9,4 +9,6 @@ routes.use('/discount', require('./discount.route'))
 
 routes.use('/cart', require('./cart.route'))
 
+routes.use('/checkout', require('./checkout.route'))
+
 module.exports = routes

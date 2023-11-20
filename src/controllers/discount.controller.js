@@ -46,14 +46,15 @@ const getListProductByDiscount = async (req, res) => {
 }
 
 const getDiscountAmount = async (req, res) => {
-    const shopId = req.userId
+    const userId = req.userId
     const discountId = req.params.discountId
     const totalOrder = req.body.totalOrder
+    const shopId = req.body.shopId
 
     const {
         discountAmount,
         totalPriceAfterDiscount
-    } = await DiscountService.getDiscountAmount({ shopId, discountId, totalOrder })
+    } = await DiscountService.getDiscountAmount({ userId, shopId, discountId, totalOrder })
 
     if (discountAmount < 0 || totalPriceAfterDiscount <= 0) throw new BadRequestErrorResponse('Error')
 

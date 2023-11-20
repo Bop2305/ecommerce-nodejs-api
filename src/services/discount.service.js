@@ -113,7 +113,7 @@ class DiscountService {
         return products
     }
 
-    static async getDiscountAmount({ userId, discountId, totalOrder }) {
+    static async getDiscountAmount({ userId, shopId, discountId, totalOrder }) {
         let totalPriceBeforeDiscount = 0
         let totalPriceAppliedDiscount = 0
         let discountAmount = 0
@@ -129,6 +129,7 @@ class DiscountService {
 
         const foundDiscount = await Discount.findOne({
             _id: discountId,
+            discount_shop: shopId,
             discount_is_active: true,
             is_published: true
         })
@@ -160,10 +161,6 @@ class DiscountService {
 
         if (countUserUsed >= discount_max_quantity_per_user) throw new BadRequestErrorResponse('Discount code is expired')
 
-        if (totalOrder < discount_min_order_value) {
-            throw new BadRequestErrorResponse(`Minimum order value ${discount_min_order_value}`)
-        }
-
         //Properties totalOrder: productId, price, quantity
 
         if (discount_applies_to !== 'ALL') {
@@ -174,6 +171,10 @@ class DiscountService {
 
                 return sum
             }, 0)
+        }
+
+        if (totalPriceAppliedDiscount < discount_min_order_value) {
+            throw new BadRequestErrorResponse(`Minimum order value ${discount_min_order_value}`)
         }
 
         if (discount_type === 'PERCENTAGE') {

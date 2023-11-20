@@ -18,7 +18,9 @@ const discountSchema = new mongoose.Schema({
     discount_products_applied: { type: Array, default: [] },
     discount_shop: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     discount_is_active: { type: Boolean, default: true },
-    create_at: { type: Date, default: Date.now() },
+    discount_owner: {type: String, require: true, enum: ['SHOP', 'SYSTEM']},
+}, {
+    timestamps: { createdAt: 'created_at', updatedAt: 'modified_at' },
 })
 
 const Discount = mongoose.model('Discount', discountSchema)

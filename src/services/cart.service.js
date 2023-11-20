@@ -107,9 +107,11 @@ class CartService {
     static async increaseQuantity({ userId, body }) {
         const { product_id, quantity = 1 } = body
 
-        const foundCart = await this.getOneCart({
-            query: { user_id: userId, cart_state: 'ACTIVE' },
-        })
+        const foundCart = await Cart.findOne({ user_id: userId, cart_state: 'ACTIVE' })
+
+        if (!foundCart) {
+            return this.addCart({ userId, body })
+        }
 
         /**
             const foundCartItem = await this.getOneCartItem({
